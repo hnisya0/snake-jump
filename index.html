@@ -1,17 +1,32 @@
-<!-- Tambahkan Tombol Leaderboard di Top Bar UI -->
-<div id="ui-container">
-    <div class="user-info">
-        <div class="badge">Pemain: <span id="display-user">-</span></div>
-        <div class="badge">Skor: <span id="score">0</span></div>
-        <button id="leaderboard-btn" class="badge-btn">🏆 Leaderboard</button>
-    </div>
-</div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ular Tangga Modern 2D</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🐍 Ular Tangga Modern 🎲</h1>
+        
+        <div class="board-wrapper">
+            <div id="board" class="board"></div>
+        </div>
 
-<!-- Modal Leaderboard -->
-<div id="leaderboard-modal" class="modal hidden">
-    <div class="modal-content">
-        <h1>🏆 TOP 10 SKOR</h1>
-        <ol id="leaderboard-list"></ol>
-        <button class="btn" id="close-leaderboard-btn">TUTUP</button>
+        <div class="controls">
+            <div class="status-panel">
+                <p>Giliran: <span id="current-turn" class="player-turn">Pemain 1</span></p>
+                <p id="game-status">Lempar dadu untuk memulai!</p>
+            </div>
+
+            <div class="dice-panel">
+                <div id="dice" class="dice">1</div>
+                <button id="roll-btn" class="btn">Kocok Dadu</button>
+            </div>
+        </div>
     </div>
-</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
