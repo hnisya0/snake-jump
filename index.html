@@ -3,55 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ular Tangga Modern 2D</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Diamond Collector 2D - NISYA</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #111; color: #fff; overflow: hidden; }
+        
+        /* UI Overlay */
+        #auth-overlay, #game-ui {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center; z-index: 10;
+        }
+
+        .card {
+            background: rgba(20, 20, 35, 0.9); padding: 30px; border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 200, 0.3); border: 1px solid #00ffcc;
+            width: 320px; text-align: center;
+        }
+
+        h2 { margin-bottom: 20px; color: #00ffcc; }
+        input {
+            width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px;
+            border: 1px solid #333; background: #222; color: #fff; text-align: center;
+        }
+        button {
+            width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px;
+            border: none; background: #00ffcc; color: #111; font-weight: bold;
+            cursor: pointer; transition: 0.2s;
+        }
+        button:hover { background: #00ccb0; }
+        .switch-btn { background: transparent; color: #aaa; text-decoration: underline; margin-top: 10px; font-size: 0.85em; }
+
+        /* Game HUD */
+        #hud {
+            position: absolute; top: 20px; left: 20px; z-index: 5;
+            font-size: 20px; font-weight: bold; text-shadow: 2px 2px 4px #000; display: none;
+        }
+        
+        /* Leaderboard Side Panel */
+        #leaderboard-panel {
+            position: absolute; top: 20px; right: 20px; z-index: 5;
+            background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 8px;
+            border: 1px solid #444; width: 200px; display: none;
+        }
+        #leaderboard-panel h3 { font-size: 16px; margin-bottom: 10px; color: #ffd700; text-align: center; }
+        #leaderboard-list { list-style: none; font-size: 14px; }
+        #leaderboard-list li { display: flex; justify-content: space-between; margin-bottom: 5px; }
+
+        #canvas-container { width: 100vw; height: 100vh; }
+    </style>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <div class="game-container">
-        <!-- FORM LOGIN PEMAIN -->
-        <div id="login-screen" class="screen">
-            <h1>🐍 Ular Tangga Modern 🎲</h1>
-            <p class="subtitle">Silakan Login Kedua Pemain</p>
-            
-            <form id="login-form">
-                <div class="player-form group-p1">
-                    <h3>🔴 Pemain 1</h3>
-                    <input type="text" id="p1-username" placeholder="Username Pemain 1" required>
-                    <input type="password" id="p1-password" placeholder="Password Pemain 1" required>
-                </div>
 
-                <div class="player-form group-p2">
-                    <h3>🔵 Pemain 2</h3>
-                    <input type="text" id="p2-username" placeholder="Username Pemain 2" required>
-                    <input type="password" id="p2-password" placeholder="Password Pemain 2" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Mulai Permainan</button>
-            </form>
-        </div>
-
-        <!-- LAYAR GAME -->
-        <div id="game-screen" class="screen hidden">
-            <h1>🐍 Ular Tangga Modern 🎲</h1>
-            
-            <div class="board-wrapper">
-                <div id="board" class="board"></div>
-            </div>
-
-            <div class="controls">
-                <div class="status-panel">
-                    <p>Giliran: <span id="current-turn" class="player-turn">Pemain 1</span></p>
-                    <p id="game-status">Lempar dadu untuk memulai!</p>
-                </div>
-
-                <div class="dice-panel">
-                    <div id="dice" class="dice">1</div>
-                    <button id="roll-btn" class="btn">Kocok Dadu</button>
-                </div>
-            </div>
+    <!-- Auth Form (Login/Register) -->
+    <div id="auth-overlay">
+        <div class="card" id="login-box">
+            <h2 id="auth-title">LOGIN GAME</h2>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button onclick="handleAuth()" id="auth-btn">Masuk</button>
+            <button class="switch-btn" onclick="toggleAuthMode()" id="switch-btn">Belum punya akun? Daftar</button>
+            <p id="auth-msg" style="color: #ff5555; margin-top: 10px; font-size: 0.9em;"></p>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- HUD Game & Leaderboard -->
+    <div id="hud">
+        Pemain: <span id="player-display" style="color:#00ffcc;">-</span> | Berlian: <span id="score-display" style="color:#ffd700;">0</span>
+    </div>
+
+    <div id="leaderboard-panel">
+        <h3>🏆 LEADERBOARD</h3>
+        <ol id="leaderboard-list"></ol>
+    </div>
+
+    <!-- Container Rendering Three.js -->
+    <div id="canvas-container"></div>
+
+    <script>
+        // === GANTI URL INI DENGAN GOOGLE APPS SCRIPT WEB APP URL ANDA ===
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwijkBpRq4hQYbhRB4zwwqJQPyqTOLcFqW1gWPhBmgYlOpyxxiHSZHaSzyeyP-6nW1q/exec";
+
+        let isRegistering = false;
+        let currentUser = "";
+        let currentScore = 0;
+
+        // Toggle antara Mode Login & Register
+        function toggleAuthMode() {
+            isRegistering = !isRegistering;
+            document.getElementById('auth-title').innerText = isRegistering ? "DAFTAR AKUN" : "LOGIN GAME";
+            document.getElementById('auth-btn').innerText = isRegistering ? "Daftar" : "Masuk";
+            document.getElementById('switch-btn').innerText = isRegistering ? "Sudah punya akun? Login" : "Belum punya akun? Daftar";
+            document.getElementById('auth-msg').innerText = "";
+        }
+
+        // Handle Fitur Auth ke Google Sheets
+        async function handleAuth() {
+            const userIn = document.getElementById('username').value.trim();
+            const passIn = document.getElementById('password').value.trim();
+            const msg = document.getElementById('auth-msg');
+
+            if (!userIn || !passIn) {
+                msg.innerText = "Isi username & password!";
+                return;
+            }
+
+            msg.style.color = "#00ffcc";
+            msg.innerText = "Memproses...";
+
+            const payload = {
+                action: isRegistering ? "register" : "login",
+                username: userIn,
+                password: passIn
+            };
+
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    if (isRegistering) {
+                        alert("Registrasi Berhasil! Silakan Login.");
+                        toggleAuthMode();
+                    } else {
+                        currentUser = userIn;
+                        currentScore = data.score || 0;
+                        document.getElementById('player-display').innerText = currentUser;
+                        document.getElementById('score-display').innerText = currentScore;
+                        document.getElementById('auth-overlay').style.display = 'none';
+                        document.getElementById('hud').style.display = 'block';
+                        document.getElementById('leaderboard-panel').style.display = 'block';
+                        
+                        // Jalankan Game & Load Leaderboard
+                        initGame();
+                        fetchLeaderboard();
+                    }
+                } else {
+                    msg.style.color = "#ff5555";
+                    msg.innerText = data.message;
+                }
+            } catch (err) {
+                msg.style.color = "#ff5555";
+                msg.innerText = "Gagal terhubung ke Server!";
+                console.error(err);
+            }
+        }
+
+        // Ambil Top Leaderboard dari Google Sheets
+        async function fetchLeaderboard() {
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL);
+                const data = await res.json();
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = "";
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${item.username}</span> <b>${item.score}</b>`;
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                console.error("Gagal load leaderboard", e);
+            }
+        }
+
+        // Simpan Skor Baru ke Google Sheets
+        async function saveScore(score) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "updateScore", username: currentUser, score: score })
+                });
+                fetchLeaderboard();
+            } catch (e) {
+                console.error("Gagal update skor", e);
+            }
+        }
+
+        /* ==========================================
+           GAME ENGINE (THREE.JS 2D PLATFORMER)
+        ========================================== */
+        let scene, camera, renderer;
+        let player, diamonds = [], platforms = [];
+        let keys = { left: false, right: false, up: false };
+        
+        // Fisika Karakter (Mario Style)
+        let playerVelocity = { x: 0, y: 0 };
+        const gravity = -0.015;
+        let isGrounded = false;
+
+        function initGame() {
+            const container = document.getElementById('canvas-container');
+
+            // 1. Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            // 2. Camera Orthographic untuk kesan 2D (Side-scroller)
+            const aspect = window.innerWidth / window.innerHeight;
+            const viewSize = 10;
+            camera = new THREE.OrthographicCamera(
+                -viewSize * aspect, viewSize * aspect, viewSize, -viewSize, 0.1, 1000
+            );
+            camera.position.set(0, 0, 10);
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // 4. Pencahayaan
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 10, 7.5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x404040, 1.5));
+
+            // 5. Membuat Karakter (Player - Red Box ala Mario)
+            const playerGeo = new THREE.BoxGeometry(0.8, 1.2, 0.2);
+            const playerMat = new THREE.MeshLambertMaterial({ color: 0xff3333 });
+            player = new THREE.Mesh(playerGeo, playerMat);
+            player.position.set(-6, -2, 0);
+            scene.add(player);
+
+            // 6. Membuat Platform (Rintangan Tanah ala Mario)
+            createPlatform(-5, -4, 30, 1);  // Tanah Utama
+            createPlatform(-4, -1, 4, 0.5); // Platform 1
+            createPlatform(1, 1, 4, 0.5);   // Platform 2
+            createPlatform(6, -1, 4, 0.5);  // Platform 3
+
+            // 7. Spawning Berlian (Diamonds)
+            createDiamond(-4, 0);
+            createDiamond(-2, 0);
+            createDiamond(1, 2);
+            createDiamond(3, 2);
+            createDiamond(6, 0);
+            createDiamond(8, 0);
+
+            // Event Listeners Kontrol Keyboard
+            window.addEventListener('keydown', (e) => handleKey(e, true));
+            window.addEventListener('keyup', (e) => handleKey(e, false));
+            window.addEventListener('resize', onWindowResize);
+
+            // Game Loop Start
+            animate();
+        }
+
+        function createPlatform(x, y, width, height) {
+            const geo = new THREE.BoxGeometry(width, height, 0.5);
+            const mat = new THREE.MeshLambertMaterial({ color: 0x4e9f3d });
+            const platform = new THREE.Mesh(geo, mat);
+            platform.position.set(x, y, 0);
+            scene.add(platform);
+            
+            // Simpan Data Bounding Box untuk Tabrakan
+            platforms.push({ mesh: platform, width: width, height: height });
+        }
+
+        function createDiamond(x, y) {
+            // Bentuk Berlian (Octahedron Geometry)
+            const geo = new THREE.OctahedronGeometry(0.4, 0);
+            const mat = new THREE.MeshPhongMaterial({ color: 0x00ffff, shininess: 100 });
+            const diamond = new THREE.Mesh(geo, mat);
+            diamond.position.set(x, y, 0);
+            scene.add(diamond);
+            diamonds.push(diamond);
+        }
+
+        function handleKey(e, isDown) {
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = isDown;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = isDown;
+            if ((e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') && isDown && isGrounded) {
+                playerVelocity.y = 0.35; // Kekuatan Lompat
+                isGrounded = false;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Horisontal Movement
+            playerVelocity.x = 0;
+            if (keys.right) playerVelocity.x = 0.1;
+            if (keys.left) playerVelocity.x = -0.1;
+
+            // Penerapan Gravitasi
+            playerVelocity.y += gravity;
+
+            // Update Posisi Player sementara
+            player.position.x += playerVelocity.x;
+            player.position.y += playerVelocity.y;
+
+            // Deteksi Tabrakan dengan Platform
+            isGrounded = false;
+            platforms.forEach(p => {
+                const px = player.position.x;
+                const py = player.position.y;
+                const pw = 0.8 / 2; // setengah lebar player
+                const ph = 1.2 / 2; // setengah tinggi player
+
+                const rx = p.mesh.position.x;
+                const ry = p.mesh.position.y;
+                const rw = p.width / 2;
+                const rh = p.height / 2;
+
+                // Simple AABB Collision Detection
+                if (px + pw > rx - rw && px - pw < rx + rw) {
+                    if (py - ph <= ry + rh && py + ph >= ry - rh) {
+                        // Jika jatuh dari atas platform
+                        if (playerVelocity.y <= 0 && py > ry) {
+                            player.position.y = ry + rh + ph;
+                            playerVelocity.y = 0;
+                            isGrounded = true;
+                        }
+                    }
+                }
+            });
+
+            // Batas Bawah / Mengulang jika jatuh (Fall Limit)
+            if (player.position.y < -8) {
+                player.position.set(-6, -2, 0);
+                playerVelocity.y = 0;
+            }
+
+            // Animasi Rotasi Berlian & Deteksi Ambil Berlian
+            diamonds.forEach((d, index) => {
+                d.rotation.y += 0.03; // Efek Berputar
+
+                // Cek jarak antara Player dan Berlian
+                if (player.position.distanceTo(d.position) < 0.8) {
+                    scene.remove(d);          // Hapus dari visual
+                    diamonds.splice(index, 1); // Hapus dari array
+                    currentScore += 10;       // Tambah Skor
+                    document.getElementById('score-display').innerText = currentScore;
+                    
+                    // Simpan skor baru ke Google Sheets
+                    saveScore(currentScore);
+                }
+            });
+
+            // Kamera Mengikuti Player (Side-scrolling Kamera)
+            camera.position.x = player.position.x;
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const aspect = window.innerWidth / window.innerHeight;
+            const viewSize = 10;
+            camera.left = -viewSize * aspect;
+            camera.right = viewSize * aspect;
+            camera.top = viewSize;
+            camera.bottom = -viewSize;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
 </body>
 </html>
