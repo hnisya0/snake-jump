@@ -2,7 +2,7 @@
 // CONFIGURATION & DATABASE URL
 // ==========================================
 // GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA!
-const GOOGLE_SHEETS_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyJXgkEialy7a9N59yysT54kICbmx7vkHw32tsPdtvIJT6wSbdNlXx0T6F0yuSJpp5y/exec";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
