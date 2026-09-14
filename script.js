@@ -1,31 +1,55 @@
 // GANTI URL DI BAWAH DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJXgkEialy7a9N59yysT54kICbmx7vkHw32tsPdtvIJT6wSbdNlXx0T6F0yuSJpp5y/exec";
 
+// Element Referensi
+const loginScreen = document.getElementById("login-screen");
+const gameScreen = document.getElementById("game-screen");
+const loginForm = document.getElementById("login-form");
+
 const board = document.getElementById("board");
 const rollBtn = document.getElementById("roll-btn");
 const diceDisplay = document.getElementById("dice");
 const currentTurnDisplay = document.getElementById("current-turn");
 const gameStatusDisplay = document.getElementById("game-status");
 
-// Konfigurasi Ular & Tangga (Posisi Awal -> Posisi Akhir)
+// Data Pemain
+let players = [
+    { username: "", password: "", color: "#E91E63" },
+    { username: "", password: "", color: "#2196F3" }
+];
+
 const snakes = { 99: 54, 70: 55, 52: 42, 25: 2 };
 const ladders = { 6: 25, 11: 40, 60: 85, 46: 90 };
 
-let positions = [1, 1]; // Posisi Pemain 1 dan Pemain 2
-let turn = 0; // 0 = Pemain 1, 1 = Pemain 2
-let turnsCount = [0, 0]; // Menghitung total kocokan per pemain
+let positions = [1, 1];
+let turn = 0; // 0 = Player 1, 1 = Player 2
+let turnsCount = [0, 0];
 
-// Generate Board (100 Ke 1 dengan pola Boustrophedon / Zig-zag)
+// Handle Submit Form Login
+loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    players[0].username = document.getElementById("p1-username").value;
+    players[0].password = document.getElementById("p1-password").value;
+    players[1].username = document.getElementById("p2-username").value;
+    players[1].password = document.getElementById("p2-password").value;
+
+    loginScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
+
+    initGame();
+});
+
+function initGame() {
+    createBoard();
+    updateTurnDisplay();
+}
+
 function createBoard() {
     board.innerHTML = "";
     for (let row = 9; row >= 0; row--) {
         for (let col = 0; col < 10; col++) {
-            let cellNum;
-            if (row % 2 === 1) {
-                cellNum = row * 10 + (10 - col);
-            } else {
-                cellNum = row * 10 + col + 1;
-            }
+            let cellNum = (row % 2 === 1) ? (row * 10 + (10 - col)) : (row * 10 + col + 1);
 
             const cell = document.createElement("div");
             cell.className = "cell";
@@ -59,12 +83,11 @@ function updateBoardUI() {
     }
 }
 
-// Fungsi Lempar Dadu
+// Roll Dadu
 rollBtn.addEventListener("click", () => {
     rollBtn.disabled = true;
     let rolls = 0;
     
-    // Animasi Dadu
     const interval = setInterval(() => {
         diceDisplay.innerText = Math.floor(Math.random() * 6) + 1;
         rolls++;
@@ -82,47 +105,50 @@ function movePlayer(diceValue) {
     let newPos = positions[turn] + diceValue;
 
     if (newPos > 100) {
-        gameStatusDisplay.innerText = `Pemain ${turn + 1} butuh angka tepat untuk selesai!`;
+        gameStatusDisplay.innerText = `${players[turn].username} butuh angka tepat!`;
         switchTurn();
         return;
     }
 
     positions[turn] = newPos;
 
-    // Cek Ular atau Tangga
     if (snakes[newPos]) {
-        gameStatusDisplay.innerText = `Aww! Pemain ${turn + 1} digigit ular ke ${snakes[newPos]}`;
+        gameStatusDisplay.innerText = `🐍 Ouch! ${players[turn].username} turun ke ${snakes[newPos]}`;
         positions[turn] = snakes[newPos];
     } else if (ladders[newPos]) {
-        gameStatusDisplay.innerText = `Hore! Pemain ${turn + 1} naik tangga ke ${ladders[newPos]}`;
+        gameStatusDisplay.innerText = `🪜 Mantap! ${players[turn].username} naik ke ${ladders[newPos]}`;
         positions[turn] = ladders[newPos];
     } else {
-        gameStatusDisplay.innerText = `Pemain ${turn + 1} maju ke petak ${newPos}`;
+        gameStatusDisplay.innerText = `${players[turn].username} maju ke petak ${newPos}`;
     }
 
     updateBoardUI();
 
     // Cek Kemenangan
     if (positions[turn] === 100) {
-        gameStatusDisplay.innerText = `🏆 PEMAIN ${turn + 1} MENANG!`;
-        saveScoreToGoogleSheets(`Pemain ${turn + 1}`, turnsCount[turn]);
+        gameStatusDisplay.innerText = `🏆 ${players[turn].username} MENANG!`;
+        saveScoreToGoogleSheets(players[turn].username, turnsCount[turn]);
         return;
     }
 
     switchTurn();
 }
 
+function updateTurnDisplay() {
+    currentTurnDisplay.innerText = players[turn].username;
+    currentTurnDisplay.style.color = players[turn].color;
+}
+
 function switchTurn() {
     turn = turn === 0 ? 1 : 0;
-    currentTurnDisplay.innerText = `Pemain ${turn + 1}`;
-    currentTurnDisplay.style.color = turn === 0 ? "#E91E63" : "#2196F3";
+    updateTurnDisplay();
     rollBtn.disabled = false;
 }
 
-// Kirim Data Skor ke Google Sheets
-function saveScoreToGoogleSheets(playerName, totalTurns) {
+// Kirim Data Rekam ke Google Sheets
+function saveScoreToGoogleSheets(winnerName, totalTurns) {
     if (GOOGLE_SCRIPT_URL === "URL_WEB_APP_GOOGLE_SHEETS_ANDA") {
-        console.warn("URL Google Apps Script belum diatur.");
+        console.warn("URL Google Apps Script belum diisi.");
         return;
     }
 
@@ -131,17 +157,16 @@ function saveScoreToGoogleSheets(playerName, totalTurns) {
         mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            playerName: playerName,
-            score: `Menang dalam ${totalTurns} kocokan`
+            p1Username: players[0].username,
+            p2Username: players[1].username,
+            winner: winnerName,
+            totalTurns: totalTurns
         })
     })
     .then(() => {
-        gameStatusDisplay.innerText += " (Skor tersimpan di Google Sheets!)";
+        gameStatusDisplay.innerText += " (Skor berhasil direkam di Google Sheets!)";
     })
     .catch(error => {
-        console.error("Gagal menyimpan data:", error);
+        console.error("Gagal mengirim data:", error);
     });
 }
-
-// Inisialisasi Game
-createBoard();
