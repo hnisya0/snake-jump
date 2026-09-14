@@ -1,58 +1,17 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>2D Snake Jump Mobile & Cloud DB</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <!-- Canvas Game 2D -->
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+<!-- Tambahkan Tombol Leaderboard di Top Bar UI -->
+<div id="ui-container">
+    <div class="user-info">
+        <div class="badge">Pemain: <span id="display-user">-</span></div>
+        <div class="badge">Skor: <span id="score">0</span></div>
+        <button id="leaderboard-btn" class="badge-btn">🏆 Leaderboard</button>
     </div>
+</div>
 
-    <!-- UI Overlay Top Bar -->
-    <div id="ui-container">
-        <div class="user-info">
-            <div class="badge">Pemain: <span id="display-user">-</span></div>
-            <div class="badge">Skor: <span id="score">0</span></div>
-        </div>
+<!-- Modal Leaderboard -->
+<div id="leaderboard-modal" class="modal hidden">
+    <div class="modal-content">
+        <h1>🏆 TOP 10 SKOR</h1>
+        <ol id="leaderboard-list"></ol>
+        <button class="btn" id="close-leaderboard-btn">TUTUP</button>
     </div>
-
-    <!-- Mobile Controls (D-Pad & Jump Button) -->
-    <div id="mobile-controls">
-        <div class="d-pad">
-            <div class="ctrl-btn btn-up" id="ctrl-up">▲</div>
-            <div class="ctrl-btn btn-left" id="ctrl-left">◄</div>
-            <div class="ctrl-btn btn-right" id="ctrl-right">►</div>
-            <div class="ctrl-btn btn-down" id="ctrl-down">▼</div>
-        </div>
-        <div class="jump-btn" id="ctrl-jump">JUMP</div>
-    </div>
-
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <h1>LOGIN SNAKE 2D</h1>
-            <p>Masukkan username & password untuk menyimpan skor ke Google Sheets.</p>
-            <input type="text" id="username" placeholder="Username" maxlength="15">
-            <input type="password" id="password" placeholder="Password">
-            <button class="btn" id="login-btn">MASUK / DAFTAR</button>
-            <div id="auth-status"></div>
-        </div>
-    </div>
-
-    <!-- Game Over Modal -->
-    <div id="gameover-modal" class="modal hidden">
-        <div class="modal-content">
-            <h1 id="go-title">GAME OVER</h1>
-            <p id="go-desc">Skor Akhir Anda: 0</p>
-            <button class="btn" id="restart-btn">MAIN LAGI</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+</div>
