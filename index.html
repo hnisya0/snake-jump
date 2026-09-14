@@ -8,21 +8,46 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>🐍 Ular Tangga Modern 🎲</h1>
-        
-        <div class="board-wrapper">
-            <div id="board" class="board"></div>
+        <!-- FORM LOGIN PEMAIN -->
+        <div id="login-screen" class="screen">
+            <h1>🐍 Ular Tangga Modern 🎲</h1>
+            <p class="subtitle">Silakan Login Kedua Pemain</p>
+            
+            <form id="login-form">
+                <div class="player-form group-p1">
+                    <h3>🔴 Pemain 1</h3>
+                    <input type="text" id="p1-username" placeholder="Username Pemain 1" required>
+                    <input type="password" id="p1-password" placeholder="Password Pemain 1" required>
+                </div>
+
+                <div class="player-form group-p2">
+                    <h3>🔵 Pemain 2</h3>
+                    <input type="text" id="p2-username" placeholder="Username Pemain 2" required>
+                    <input type="password" id="p2-password" placeholder="Password Pemain 2" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Mulai Permainan</button>
+            </form>
         </div>
 
-        <div class="controls">
-            <div class="status-panel">
-                <p>Giliran: <span id="current-turn" class="player-turn">Pemain 1</span></p>
-                <p id="game-status">Lempar dadu untuk memulai!</p>
+        <!-- LAYAR GAME -->
+        <div id="game-screen" class="screen hidden">
+            <h1>🐍 Ular Tangga Modern 🎲</h1>
+            
+            <div class="board-wrapper">
+                <div id="board" class="board"></div>
             </div>
 
-            <div class="dice-panel">
-                <div id="dice" class="dice">1</div>
-                <button id="roll-btn" class="btn">Kocok Dadu</button>
+            <div class="controls">
+                <div class="status-panel">
+                    <p>Giliran: <span id="current-turn" class="player-turn">Pemain 1</span></p>
+                    <p id="game-status">Lempar dadu untuk memulai!</p>
+                </div>
+
+                <div class="dice-panel">
+                    <div id="dice" class="dice">1</div>
+                    <button id="roll-btn" class="btn">Kocok Dadu</button>
+                </div>
             </div>
         </div>
     </div>
