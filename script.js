@@ -147,7 +147,7 @@ function switchTurn() {
 
 // Kirim Data Rekam ke Google Sheets
 function saveScoreToGoogleSheets(winnerName, totalTurns) {
-    if (GOOGLE_SCRIPT_URL === "URL_WEB_APP_GOOGLE_SHEETS_ANDA") {
+    if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyJXgkEialy7a9N59yysT54kICbmx7vkHw32tsPdtvIJT6wSbdNlXx0T6F0yuSJpp5y/exec") {
         console.warn("URL Google Apps Script belum diisi.");
         return;
     }
