@@ -1,195 +1,30 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-    -webkit-user-select: none;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    touch-action: none;
-}
-
-body, html {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #1a1a2e;
-    color: #fff;
-}
-
-#game-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-}
-
-canvas {
-    background-color: #16213e;
-    border: 2px solid #00ffcc;
-    box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-    border-radius: 10px;
-}
-
-/* UI Overlay */
-#ui-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 15px;
-}
-
-.user-info {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.badge {
-    font-size: 16px;
+.badge-btn {
+    font-size: 14px;
     font-weight: bold;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
     backdrop-filter: blur(10px);
     padding: 8px 16px;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* Modal Overlay */
-.modal {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 30;
-    pointer-events: auto;
-}
-
-.modal-content {
-    background: #16213e;
-    padding: 25px;
-    border-radius: 15px;
-    text-align: center;
-    max-width: 360px;
-    width: 85%;
-    border: 1px solid #00ffcc;
-    box-shadow: 0 0 25px rgba(0, 255, 204, 0.4);
-}
-
-.modal h1 { color: #00ffcc; margin-bottom: 10px; font-size: 24px; }
-.modal p { font-size: 13px; color: #ccc; margin-bottom: 15px; }
-
-.modal input {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid #0f3460;
-    background: #0f3460;
-    color: #fff;
-    font-size: 15px;
-    text-align: center;
-    outline: none;
-    touch-action: auto;
-}
-
-.modal input:focus { border-color: #00ffcc; }
-
-.btn {
-    background: linear-gradient(45deg, #00ffcc, #0099ff);
-    color: #1a1a2e;
-    border: none;
-    padding: 12px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 25px;
+    border: 1px solid #ffd700;
     cursor: pointer;
-    width: 100%;
-    margin-top: 10px;
-    touch-action: auto;
 }
 
-.btn:active { transform: scale(0.96); }
-
-#auth-status {
-    font-size: 13px;
-    margin-top: 10px;
-    color: #ff3366;
+.badge-btn:active {
+    transform: scale(0.95);
 }
 
-/* On-Screen Mobile Controls */
-#mobile-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    width: 100%;
-    height: 140px;
-    z-index: 20;
-    pointer-events: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
+#leaderboard-list {
+    text-align: left;
+    margin: 15px 0;
+    padding-left: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #fff;
 }
 
-.d-pad {
-    display: grid;
-    grid-template-columns: repeat(3, 45px);
-    grid-template-rows: repeat(3, 45px);
-    gap: 4px;
+#leaderboard-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 15px;
 }
-
-.ctrl-btn {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.ctrl-btn:active { background: rgba(0, 255, 204, 0.6); }
-
-.btn-up { grid-column: 2; grid-row: 1; }
-.btn-left { grid-column: 1; grid-row: 2; }
-.btn-right { grid-column: 3; grid-row: 2; }
-.btn-down { grid-column: 2; grid-row: 3; }
-
-.jump-btn {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(0, 255, 204, 0.3);
-    border: 2px solid #00ffcc;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-}
-
-.jump-btn:active { background: rgba(0, 255, 204, 0.7); }
-
-.hidden { display: none !important; }
